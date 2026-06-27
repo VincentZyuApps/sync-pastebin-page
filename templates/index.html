@@ -1,41 +1,320 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>PasteBin</title>
-<style>
-@font-face{font-family:'HarmonyOS';src:url('/assets/fonts/HarmonyOS_Sans_Regular.ttf')format('truetype')}
-body{font-family:'HarmonyOS',sans-serif;margin:20px;background:#f5f5f5}
-.container{max-width:800px;margin:0 auto}
-textarea{width:100%;height:60vh;padding:15px;font-size:16px;border:1px solid #ccc;border-radius:8px;box-sizing:border-box;resize:vertical}
-h2{color:#333}
-.status{font-size:14px;color:#666;margin-bottom:10px}
-.btn-copy{padding:6px 14px;font-size:14px;border:1px solid #ccc;border-radius:6px;background:#fff;cursor:pointer;margin-bottom:8px}
-.btn-copy:hover{background:#e8e8e8}
-.btn-copy:active{background:#d0d0d0}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>PasteBin</title>
+    <style>
+        @font-face {
+            font-family: 'HarmonyOS';
+            src: url('/assets/fonts/HarmonyOS_Sans_Regular.ttf') format('truetype');
+        }
+        body {
+            font-family: 'HarmonyOS', sans-serif;
+            margin: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        textarea {
+            width: 100%;
+            height: 60vh;
+            padding: 15px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-sizing: border-box;
+            resize: vertical;
+        }
+        h2, h3 {
+            color: #333;
+        }
+        h3 {
+            margin: 16px 0 8px;
+            font-size: 16px;
+        }
+        .status {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        .btn-copy, .btn-paste, .btn-clear,
+        .btn-img-paste, .btn-img-browse, .btn-img-clear, .btn-img-copy {
+            padding: 6px 14px;
+            font-size: 14px;
+            border-radius: 6px;
+            background: #fff;
+            cursor: pointer;
+            margin-bottom: 8px;
+        }
+        .btn-copy, .btn-img-copy {
+            border: 1px solid #ccc;
+        }
+        .btn-copy:hover, .btn-img-copy:hover {
+            background: #e8e8e8;
+        }
+        .btn-copy:active, .btn-img-copy:active {
+            background: #d0d0d0;
+        }
+        .btn-paste, .btn-img-paste {
+            border: 1px solid #6a8;
+            margin-left: 8px;
+        }
+        .btn-paste:hover, .btn-img-paste:hover {
+            background: #eefaf3;
+        }
+        .btn-paste:active, .btn-img-paste:active {
+            background: #dff3e8;
+        }
+        .btn-clear, .btn-img-clear {
+            border: 1px solid #d66;
+            margin-left: 8px;
+        }
+        .btn-clear:hover, .btn-img-clear:hover {
+            background: #ffecec;
+        }
+        .btn-clear:active, .btn-img-clear:active {
+            background: #ffd6d6;
+        }
+        .btn-img-browse {
+            border: 1px solid #68a;
+            margin-left: 8px;
+        }
+        .btn-img-browse:hover {
+            background: #eef0fa;
+        }
+        .btn-img-browse:active {
+            background: #dde0f3;
+        }
+        .image-container {
+            margin-bottom: 16px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 10px;
+            background: #fff;
+            text-align: center;
+        }
+        .image-container img {
+            max-width: 100%;
+            max-height: 300px;
+            object-fit: contain;
+        }
+        .section-divider {
+            border: none;
+            border-top: 1px solid #ddd;
+            margin: 20px 0;
+        }
+    </style>
 </head>
 <body>
-<div class=container>
-<h2>📋 PasteBin</h2>
-<div class=status id=status>Connecting...</div>
-<button class=btn-copy id=btnCopy onclick="copyText()">📋 Copy</button>
-<textarea id=pad placeholder="Type or paste something. All devices stay in sync.">__INITIAL_TEXT__</textarea>
-</div>
-<script>
-const ta=document.getElementById('pad'),st=document.getElementById('status'),btn=document.getElementById('btnCopy')
-function copyText(){navigator.clipboard.writeText(ta.value).then(()=>{const t=btn.innerText;btn.innerText='✅ Copied';setTimeout(()=>btn.innerText=t,1500)})}
-const wsProto=location.protocol==='https:'?'wss://':'ws://'
-let ws
-function connect(){
-ws=new WebSocket(wsProto+location.host+'/ws')
-ws.onopen=()=>{st.innerText='🟢 Connected (live sync)';st.style.color='green'}
-ws.onmessage=e=>{const s=ta.selectionStart,end=ta.selectionEnd;ta.value=e.data;ta.setSelectionRange(s,end)}
-ws.onclose=()=>{st.innerText='🔴 Disconnected, retrying in 3s...';st.style.color='red';setTimeout(connect,3000)}
-}
-ta.addEventListener('input',()=>{if(ws&&ws.readyState===WebSocket.OPEN)ws.send(ta.value)})
-connect()
-</script>
+    <div class="container">
+        <h2>📋 PasteBin</h2>
+        <div class="status" id="status">Connecting...</div>
+
+        <h3>🖼️ Image</h3>
+        <div class="image-tools">
+            <button class="btn-img-paste" id="btnImgPaste" onclick="pasteImage()">📋 Paste</button>
+            <button class="btn-img-browse" id="btnImgBrowse" onclick="browseImage()">📁 Browse</button>
+            <button class="btn-img-clear" id="btnImgClear" onclick="clearImage()">🗑️ Clear</button>
+            <button class="btn-img-copy" id="btnImgCopy" onclick="copyImage()">📋 Copy Image</button>
+        </div>
+        <div class="image-container" id="imageContainer" style="display:none">
+            <img id="imageDisplay" src="" alt="Image preview">
+        </div>
+
+        <hr class="section-divider">
+
+        <h3>📝 Text</h3>
+        <button class="btn-copy" id="btnCopy" onclick="copyText()">📋 Copy</button>
+        <button class="btn-paste" id="btnPaste" onclick="pasteText()">📥 Paste</button>
+        <button class="btn-clear" id="btnClear" onclick="clearText()">🧹 Clear</button>
+        <textarea id="pad" placeholder="Type or paste something. All devices stay in sync.">__INITIAL_TEXT__</textarea>
+    </div>
+
+    <script>
+        const ta = document.getElementById('pad');
+        const st = document.getElementById('status');
+
+        function displayImage(src) {
+            const img = document.getElementById('imageDisplay');
+            const container = document.getElementById('imageContainer');
+            if (src) {
+                img.src = src;
+                container.style.display = 'block';
+            } else {
+                hideImage();
+            }
+        }
+
+        function hideImage() {
+            const img = document.getElementById('imageDisplay');
+            const container = document.getElementById('imageContainer');
+            img.src = '';
+            container.style.display = 'none';
+        }
+
+        function sendMsg(obj) {
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify(obj));
+            }
+        }
+
+        function copyText() {
+            navigator.clipboard.writeText(ta.value).then(() => {
+                const btn = document.getElementById('btnCopy');
+                const t = btn.innerText;
+                btn.innerText = '✅ Copied';
+                setTimeout(() => btn.innerText = t, 1500);
+            });
+        }
+
+        async function pasteText() {
+            const btn = document.getElementById('btnPaste');
+            try {
+                const text = await navigator.clipboard.readText();
+                ta.value = text;
+                ta.focus();
+                ta.setSelectionRange(text.length, text.length);
+                sendMsg({type: 'text', data: text});
+                const t = btn.innerText;
+                btn.innerText = '✅ Pasted';
+                setTimeout(() => btn.innerText = t, 1500);
+            } catch (err) {
+                const t = btn.innerText;
+                btn.innerText = '❌ Denied';
+                setTimeout(() => btn.innerText = t, 1500);
+            }
+        }
+
+        function clearText() {
+            ta.value = '';
+            ta.focus();
+            sendMsg({type: 'clear', target: 'text'});
+        }
+
+        async function pasteImage() {
+            const btn = document.getElementById('btnImgPaste');
+            try {
+                const items = await navigator.clipboard.read();
+                for (const item of items) {
+                    const imageType = item.types.find(t => t.startsWith('image/'));
+                    if (imageType) {
+                        const blob = await item.getType(imageType);
+                        const reader = new FileReader();
+                        reader.onload = () => {
+                            const dataUrl = reader.result;
+                            displayImage(dataUrl);
+                            sendMsg({type: 'image', data: dataUrl});
+                        };
+                        reader.readAsDataURL(blob);
+                        const t = btn.innerText;
+                        btn.innerText = '✅ Pasted';
+                        setTimeout(() => btn.innerText = t, 1500);
+                        return;
+                    }
+                }
+                btn.innerText = '❌ No Image';
+                setTimeout(() => btn.innerText = '📋 Paste', 1500);
+            } catch (err) {
+                btn.innerText = '❌ Denied';
+                setTimeout(() => btn.innerText = '📋 Paste', 1500);
+            }
+        }
+
+        function browseImage() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.onchange = () => {
+                const file = input.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = () => {
+                    const dataUrl = reader.result;
+                    displayImage(dataUrl);
+                    sendMsg({type: 'image', data: dataUrl});
+                };
+                reader.readAsDataURL(file);
+            };
+            input.click();
+        }
+
+        function clearImage() {
+            hideImage();
+            sendMsg({type: 'clear', target: 'image'});
+        }
+
+        async function copyImage() {
+            const img = document.getElementById('imageDisplay');
+            const container = document.getElementById('imageContainer');
+            const btn = document.getElementById('btnImgCopy');
+            if (container.style.display === 'none') {
+                btn.innerText = '❌ Empty';
+                setTimeout(() => btn.innerText = '📋 Copy Image', 1500);
+                return;
+            }
+            try {
+                const resp = await fetch(img.src);
+                const blob = await resp.blob();
+                await navigator.clipboard.write([
+                    new ClipboardItem({[blob.type]: blob})
+                ]);
+                btn.innerText = '✅ Copied';
+                setTimeout(() => btn.innerText = '📋 Copy Image', 1500);
+            } catch (err) {
+                btn.innerText = '❌ Failed';
+                setTimeout(() => btn.innerText = '📋 Copy Image', 1500);
+            }
+        }
+
+        const wsProto = location.protocol === 'https:' ? 'wss://' : 'ws://';
+        let ws;
+
+        function connect() {
+            ws = new WebSocket(wsProto + location.host + '/ws');
+            ws.onopen = () => {
+                st.innerText = '🟢 Connected (live sync)';
+                st.style.color = 'green';
+            };
+            ws.onmessage = e => {
+                const msg = JSON.parse(e.data);
+                if (msg.type === 'text') {
+                    const s = ta.selectionStart;
+                    const end = ta.selectionEnd;
+                    ta.value = msg.data;
+                    ta.setSelectionRange(
+                        Math.min(s, ta.value.length),
+                        Math.min(end, ta.value.length)
+                    );
+                } else if (msg.type === 'image') {
+                    displayImage(msg.data);
+                } else if (msg.type === 'clear') {
+                    if (msg.target === 'text') {
+                        ta.value = '';
+                    } else if (msg.target === 'image') {
+                        hideImage();
+                    }
+                }
+            };
+            ws.onclose = () => {
+                st.style.color = 'red';
+                let n = 5;
+                st.innerText = `🔴 Disconnected, retrying in ${n}s...`;
+                const timer = setInterval(() => {
+                    n--;
+                    st.innerText = `🔴 Disconnected, retrying in ${n}s...`;
+                    if (n <= 0) {
+                        clearInterval(timer);
+                        connect();
+                    }
+                }, 1000);
+            };
+        }
+
+        ta.addEventListener('input', () => sendMsg({type: 'text', data: ta.value}));
+        connect();
+    </script>
 </body>
 </html>
