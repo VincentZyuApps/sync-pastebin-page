@@ -14,19 +14,19 @@
 [![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
 [![WebSocket](https://img.shields.io/badge/WebSocket-4A4A55?style=for-the-badge&logo=socketdotio&logoColor=white)](https://developer.mozilla.org/en-US/docs/Web/API/WebSocket)
 
-Real-time clipboard sync over LAN — type on one device, it appears on all others instantly.
+局域网内实时剪贴板同步 — 在一个设备上输入，所有设备立即同步显示。
 
-## 🎯 Example
+## 🎯 示例场景
 
-Temporarily sync text or images between a phone and a PC on the same LAN. No need to install WeChat or QQ — just open the link in the browser.
+比如局域网内的两台手机和电脑之间临时同步文字或图片。不想装微信 QQ，直接用浏览器打开链接即可。
 
-## 🖼️ Preview
+## 🖼️ 预览
 
 | PC | Phone |
 |:-:|:-:|
 | ![PC](docs/images/preview/preview.pc.png) | ![Phone](docs/images/preview/preview.phone.png) |
 
-## 🚀 Run
+## 🚀 运行
 
 ```bash
 uv venv --python 3.13
@@ -34,11 +34,11 @@ uv pip install fastapi uvicorn websockets
 uv run uvicorn app:app --host 0.0.0.0 --port 60628
 ```
 
-## 📦 Dependencies
+## 📦 依赖
 
 | Package | Version | Description |
 |:--------|:--------|:------------|
-| [![Python](https://img.shields.io/badge/Python-3.13-3776AB?style=flat-square&logo=python&logoColor=white)](https://python.org/) | 3.13 | Runtime |
-| [![FastAPI](https://img.shields.io/badge/FastAPI-latest-009688?style=flat-square&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/) | latest | Web framework |
-| [![Uvicorn](https://img.shields.io/badge/Uvicorn-latest-000000?style=flat-square&logo=uvicorn&logoColor=white)](https://www.uvicorn.org/) | latest | ASGI server |
-| [![websockets](https://img.shields.io/badge/websockets-latest-000000?style=flat-square&logo=socketdotio&logoColor=white)](https://github.com/encode/uvicorn) | latest | WebSocket protocol support |
+| [![Python](https://img.shields.io/badge/Python-3.13-3776AB?style=flat-square&logo=python&logoColor=white)](https://python.org/) | 3.13 | 运行环境 |
+| [![FastAPI](https://img.shields.io/badge/FastAPI-latest-009688?style=flat-square&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/) | latest | Web 框架 |
+| [![Uvicorn](https://img.shields.io/badge/Uvicorn-latest-000000?style=flat-square&logo=uvicorn&logoColor=white)](https://www.uvicorn.org/) | latest | ASGI 服务器 |
+| [![websockets](https://img.shields.io/badge/websockets-latest-000000?style=flat-square&logo=socketdotio&logoColor=white)](https://github.com/encode/uvicorn) | latest | WebSocket 协议支持 |
